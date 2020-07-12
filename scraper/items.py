@@ -24,3 +24,34 @@ class CountryPopulationItem(scrapy.Item):
     med_age = scrapy.Field()
     urban_pop = scrapy.Field()
     world_share = scrapy.Field()
+
+
+class HistoricalPopulationItem(scrapy.Item):
+    country = scrapy.Field()
+    historical_pop = scrapy.Field()
+
+
+class ForecastPopulationItem(scrapy.Item):
+    country = scrapy.Field()
+    forecast_pop = scrapy.Field()
+
+
+class DetailPopulationItem(scrapy.Item):
+    year = scrapy.Field()
+    population = scrapy.Field()
+    yearly_percent_change = scrapy.Field()
+    yearly_change = scrapy.Field()
+    migrants = scrapy.Field()
+    med_age = scrapy.Field()
+    fer_rate = scrapy.Field()
+    density = scrapy.Field()
+    urban_pop_percentage = scrapy.Field()
+    urban_pop = scrapy.Field()
+    country_share_population = scrapy.Field()
+    world_population = scrapy.Field()
+    global_rank = scrapy.Field()
+
+
+class CitiesPoulation(scrapy.Item):
+    country = scrapy.Field()
+    cities_pop = scrapy.Field()

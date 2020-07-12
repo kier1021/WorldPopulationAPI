@@ -6,6 +6,7 @@
 
 # useful for handling different item types with a single interface
 import pymongo
+from .items import CountryPopulationItem, HistoricalPopulationItem, ForecastPopulationItem, CitiesPoulation
 
 
 class ScraperPipeline:
@@ -13,24 +14,14 @@ class ScraperPipeline:
         return item
 
 
-class MongoPipeline:
-
-    def __init__(self, mongo_uri, mongo_db, mongo_collection, primary_key):
+class WorldPopulationPipeline:
+    def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
-        self.mongo_collecion = mongo_collection
-        self.primary_key = primary_key
+        self.mongo_collection = None
+        self.primary_key = None
         self.client = None
         self.db = None
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI'),
-            mongo_db=crawler.settings.get('MONGO_DATABASE', 'items'),
-            mongo_collection=crawler.settings.get('MONGO_COLLECTION'),
-            primary_key=crawler.settings.get('PRIMARY_KEY')
-        )
 
     def open_spider(self, spider):
         self.client = pymongo.MongoClient(self.mongo_uri)
@@ -39,11 +30,30 @@ class MongoPipeline:
     def close_spider(self, spider):
         self.client.close()
 
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DATABASE', 'items')
+        )
+
     def process_item(self, item, spider):
-        self.db[self.mongo_collecion].update_one(
+        if isinstance(item, CountryPopulationItem):
+            self.mongo_collection = spider.settings.get('COUNTRY_POPULATION_COLLECTION')
+            self.primary_key = spider.settings.get('COUNTRY_POPULATION_PK')
+        elif isinstance(item, HistoricalPopulationItem):
+            self.mongo_collection = spider.settings.get('HISTORICAL_POPULATION_COLLECTION')
+            self.primary_key = spider.settings.get('HISTORICAL_POPULATION_PK')
+        elif isinstance(item, ForecastPopulationItem):
+            self.mongo_collection = spider.settings.get('FORECAST_POPULATION_COLLECTION')
+            self.primary_key = spider.settings.get('FORECAST_POPULATION_PK')
+        elif isinstance(item, CitiesPoulation):
+            self.mongo_collection = spider.settings.get('CITY_POPULATION_COLLECTION')
+            self.primary_key = spider.settings.get('CITY_POPULATION_PK')
+
+        self.db[self.mongo_collection].update_one(
             {self.primary_key: item[self.primary_key]},
             {'$set': dict(item)},
             upsert=True
         )
         return item
-
